@@ -45,10 +45,13 @@ def stage_list(workdir: str, user: str, status: str, limit: int | None,
 
 
 # ---------------------------------------------------------------- extract
-def stage_extract(workdir: str, items: list[dict]) -> dict:
+def stage_extract(workdir: str, items: list[dict], fresh: bool = False) -> dict:
     logger = get_logger()
     path = _p(workdir, "themes.json")
     done = read_json(path, None) or {}
+    if fresh and done:
+        logger.info("[extract] --fresh: ignoring cached themes.json, refetching all")
+        done = {}
     banner("extract", len(items))
     n_new = 0
     try:
@@ -87,10 +90,13 @@ def _song_key(mid, op_title) -> str:
 
 
 def stage_resolve(workdir: str, items: list[dict], themes: dict,
-                  client) -> list[dict]:
+                  client, fresh: bool = False) -> list[dict]:
     logger = get_logger()
     path = _p(workdir, "master.json")
     master = read_json(path, None) or []
+    if fresh and master:
+        logger.info("[resolve] --fresh: rebuilding master.json from scratch")
+        master = []
     # Deferred rows (quota cooldown) are NOT final — drop them from the
     # checkpoint view so this rerun retries them; keep everything else.
     master = [r for r in master if not r.get("flag", "").startswith("DEFERRED-")]

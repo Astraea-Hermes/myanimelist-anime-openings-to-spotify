@@ -63,7 +63,11 @@ If you installed with `pipx install .` / `pip install .`, replace
 
 Run the same command twice: completed stages and per-show fetches are
 checkpointed in `--workdir` and skipped, so a crash, a `Ctrl-C`, or a Spotify
-rate-limit pause loses no progress. `--fresh` refetches everything.
+rate-limit pause loses no progress. `--fresh` ignores every checkpoint in the
+workdir (list, theme pages, resolved tracks) and refetches from MAL;
+`playlist_state.json` is always respected, since it records the actual Spotify
+playlist, not a cache. To start from a truly empty slate, use a new
+`--workdir`.
 
 ## CLI
 

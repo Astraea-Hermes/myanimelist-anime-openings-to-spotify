@@ -45,7 +45,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="With --create-playlist: print the plan, write nothing "
                         "to Spotify")
     p.add_argument("--fresh", action="store_true",
-                   help="Ignore existing checkpoints in --workdir and refetch")
+                   help="Ignore all checkpoints in --workdir (list, themes, "
+                        "resolved) and refetch; playlist_state is respected")
     p.add_argument("-v", "--verbose", action="store_true",
                    help="Debug logging on the console")
     p.add_argument("--version", action="version", version=f"mal-openings {VERSION}")
@@ -93,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
         items = pipeline.stage_list(args.workdir, args.user, args.status,
                                     args.limit, args.skip_movies,
                                     fresh=args.fresh)
-        themes = pipeline.stage_extract(args.workdir, items)
+        themes = pipeline.stage_extract(args.workdir, items, fresh=args.fresh)
 
         client = None
         if args.create_playlist:
@@ -109,7 +110,8 @@ def main(argv: list[str] | None = None) -> int:
             who = me.get("display_name") or me.get("id")
             logger.info("[spotify] logged in as %s", who)
 
-        master = pipeline.stage_resolve(args.workdir, items, themes, client)
+        master = pipeline.stage_resolve(args.workdir, items, themes, client,
+                                        fresh=args.fresh)
         result = pipeline.stage_report(args.workdir, items, themes, master,
                                        user=args.user, status=args.status)
 
