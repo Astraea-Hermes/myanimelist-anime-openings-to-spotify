@@ -1,7 +1,6 @@
 """Paths, config resolution, and private-file IO (stdlib only)."""
 import json
 import os
-import tempfile
 
 APP_NAME = "mal-openings"
 VERSION = "0.1.0"
@@ -42,20 +41,13 @@ def write_json(path: str, obj, private: bool = False) -> None:
     d = os.path.dirname(path)
     if d:
         os.makedirs(d, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=d or ".", prefix=".tmp-")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            json.dump(obj, f, indent=1, ensure_ascii=False)
-            f.write("\n")
-        if private:
-            os.chmod(tmp, 0o600)
-        os.replace(tmp, path)
-    except BaseException:
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
-        raise
+    tmp = f"{path}.tmp-{os.getpid()}"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, indent=1, ensure_ascii=False)
+        f.write("\n")
+    if private:
+        os.chmod(tmp, 0o600)
+    os.replace(tmp, path)
 
 
 def resolve_client_id(cli_value=None, config=None):
