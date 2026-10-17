@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mal-openings"
-version = "0.1.0"
+version = "0.1.1"
 description = "Build a Spotify playlist of opening themes for every show on a MyAnimeList user's list. Zero dependencies, stdlib only."
 readme = "README.md"
 requires-python = ">=3.11"
