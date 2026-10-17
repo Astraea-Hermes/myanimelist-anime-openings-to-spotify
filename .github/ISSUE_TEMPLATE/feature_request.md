@@ -2,7 +2,7 @@
 name: Feature request
 about: Propose a change — read CONTRIBUTING.md's non-goals first
 title: "[feat] "
-labels: ''
+labels: enhancement
 assignees: ''
 ---
 

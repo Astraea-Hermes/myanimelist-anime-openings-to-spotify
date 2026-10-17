@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Zero-dependency guard (stdlib imports only)
+        run: |
+          python - <<'EOF'
+          import ast, pathlib, sys
+          ALLOWED = {
+              "os","re","sys","json","csv","time","html","urllib","http",
+              "unicodedata","argparse","webbrowser","socket","threading",
+              "hashlib","base64","secrets","pathlib","datetime","collections",
+              "textwrap","shutil","logging","__future__","unittest","typing",
+              "dataclasses","enum","functools","io","string","stat","errno",
+              "traceback","tempfile","gzip","zlib","codecs","locale","math",
+          }
+          bad = []
+          for p in pathlib.Path("mal_openings").rglob("*.py"):
+              tree = ast.parse(p.read_text(encoding="utf-8"))
+              for node in ast.walk(tree):
+                  mods = []
+                  if isinstance(node, ast.Import):
+                      mods = [a.name.split(".")[0] for a in node.names]
+                  elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                      mods = [node.module.split(".")[0]]
+                  for m in mods:
+                      if m not in ALLOWED:
+                          bad.append(f"{p}: {m}")
+          if bad:
+              print("NON-STDLIB IMPORTS:\n  " + "\n  ".join(bad))
+              sys.exit(1)
+          print("stdlib-only: OK")
+          EOF
+      - name: Tests
+        run: python -m unittest discover -s tests -v

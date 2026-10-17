@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions, ideas, and showing off playlists
+    url: https://github.com/Astraea-Hermes/mal-openings/discussions
+    about: >-
+      Ask how-tos, brainstorm before scoping, share what you built.
+      Discussions keeps the issue tracker for concrete bugs and
+      scope-accepted work.

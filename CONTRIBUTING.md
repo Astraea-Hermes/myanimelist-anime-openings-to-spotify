@@ -16,24 +16,38 @@ These aren't value judgments — they're the walls that keep the tool small,
 auditable, and dependency-free. Expect closure "as not planned, see non-goals"
 for:
 
+- **Anything that breaks another service's terms of use.** This is the hard
+  floor, above every other rule: scraping that ignores rate limits or private
+  data, circumventing Spotify developer-mode restrictions, automating MAL or
+  Spotify logins, ripping protected media. A request can be clever, popular,
+  and badly needed — if it violates a ToS, the answer is no, and usually
+  "not possible" as well.
+- **Category pivots.** The tool is a focused CLI for one job. Adjacent ideas —
+  a game, a streaming app, **YouTube/Apple-Music/other-platform playlist
+  creation** — are not on the list; each brings its own ToS minefield (YouTube
+  API quota rules, scraping ToS) and would rebuild half the codebase. Popular
+  demand changes *what fits the shape*, not *what the shape is*.
 - **Third-party dependencies.** No requests/spotipy/pandas, ever. The stdlib
-  constraint is the product.
+  constraint is the product — CI enforces it.
 - **Encore/ending themes, insert songs, full OSTs, artist-radio playlists.**
   Openings only. (Build on top of `themes.json` if you want more — the file is
   documented, the parsing layer is yours to reuse.)
-- **Sites other than MyAnimeList** (AniList, Kitsu, Yuroky…) and **music
-  services other than Spotify.** One input, one output keeps the scraper
-  surface honest.
+- **Sites other than MyAnimeList as inputs** (AniList, Kitsu…) and **music
+  services other than Spotify as outputs.** One input, one output keeps the
+  scraper surface honest.
 - **GUI, web UI, TUI, mobile.** It's a CLI with a review spreadsheet.
 - **Anything requiring server/daemon/telemetry.** The tool makes exactly two
   kinds of outbound calls: public MAL pages, and your own Spotify API calls
   with your own token. That privacy posture is a feature, not an oversight.
 - **Bulk/multi-user scraping, MAL account automation, login to MAL.**
   Rate-limited public-page scraping of a username you were given; nothing more.
-- **Circumventing Spotify dev-mode restrictions.** Quotas and the
-  User Management allow-list are Spotify's rules; the tool works within them
-  (that's why it prefers MAL's embedded track IDs over search). Requests to
-  route around them will be declined as not-possible and not-allowed.
+
+What we *will* weigh on community demand, because it stays inside the shape:
+better MAL status/filter selection, output-format options, per-show grouping
+modes, resolution-quality of matches, documentation for more platforms'
+terminal quirks. "Reasonable work scope" is exactly the line — big lift for a
+real user problem = probably yes; big lift that changes what the project *is*
+= no.
 
 ## How to propose something
 

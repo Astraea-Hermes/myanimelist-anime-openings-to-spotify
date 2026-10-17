@@ -2,7 +2,7 @@
 name: Bug report
 about: Something misbehaves on a MAL page or a Spotify call
 title: "[bug] "
-labels: bug
+labels: bug, needs-repro
 assignees: ''
 ---
 
