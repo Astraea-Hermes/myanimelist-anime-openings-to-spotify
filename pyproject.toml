@@ -1,7 +1,6 @@
 [build-system]
-requires = []
+requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
-backend-path = []
 
 [project]
 name = "mal-openings"
