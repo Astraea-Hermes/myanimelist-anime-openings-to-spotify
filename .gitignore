@@ -1,0 +1,19 @@
+# Reference data from the private live build (session data — never published).
+reference/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Work dirs / artifacts (any --workdir output kept out of the repo)
+work/
+workdir/
+mo-test*/
+mal-openings-work/
+*.log
+
+# Local OS/editor noise
+.DS_Store
