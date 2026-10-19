@@ -7,8 +7,9 @@ HTML entities). Stdlib unittest only:  python3 -m unittest
 import html as H
 import json
 import unittest
+from unittest.mock import patch
 
-from mal_openings.mal import extract_openings, parse_user_list
+from mal_openings.mal import MalError, extract_openings, get_user_list, parse_user_list
 from mal_openings.normalize import title_alts, title_match, artist_tokens
 
 # ---------------------------------------------------------------- fixtures
@@ -106,6 +107,18 @@ def user_list_page(items):
             f'</table></body></html>')
 
 
+def tile_user_list_page(items):
+    """Synthetic tile-view list page with optional progress and tag cells."""
+    blob = H.escape(json.dumps(items), quote=True)
+    return (f'<html><body><table class="list-table" data-items="{blob}" '
+            'data-server="1"><tbody>'
+            '<tr class="list-table-data"><td class="title">Special</td>'
+            '<td class="progress">1 / 1</td></tr>'
+            '<tr class="list-table-data"><td class="title">ONA entry</td>'
+            '<td class="tags"><span>watch-later</span></td></tr>'
+            '</tbody></table></body></html>')
+
+
 # ---------------------------------------------------------------- tests
 
 class TestOpeningParsers(unittest.TestCase):
@@ -171,6 +184,33 @@ class TestUserListParser(unittest.TestCase):
 
     def test_no_table_returns_empty(self):
         self.assertEqual(parse_user_list("<html>nothing</html>"), [])
+
+    def test_tile_view_supports_tv_special_ona_missing_progress_and_tags(self):
+        items = [
+            {"status": 2, "anime_id": 901, "anime_title": "Special",
+             "anime_title_eng": "Special Episode", "anime_media_type_string": "TV Special",
+             "num_watched_episodes": 1},
+            {"status": 6, "anime_id": 902, "anime_title": "ONA Entry",
+             "anime_title_eng": "ONA Entry", "anime_media_type_string": "ONA",
+             "tags": "watch-later"},
+        ]
+
+        rows = parse_user_list(tile_user_list_page(items))
+
+        self.assertEqual(rows, [
+            {"mal_id": 901, "title": "Special Episode", "type": "TV Special",
+             "row": 0, "status": 2},
+            {"mal_id": 902, "title": "ONA Entry", "type": "ONA",
+             "row": 1, "status": 6},
+        ])
+
+    @patch("mal_openings.mal.fetch", return_value=user_list_page([]))
+    def test_empty_requested_status_raises_clean_error(self, mock_fetch):
+        with self.assertRaisesRegex(MalError, "^no list rows found"):
+            get_user_list("synthetic-user", status="completed")
+
+        mock_fetch.assert_called_once_with(
+            "https://myanimelist.net/animelist/synthetic-user?status=2")
 
 
 class TestNormalize(unittest.TestCase):
