@@ -71,18 +71,30 @@ playlist, not a cache. To start from a truly empty slate, use a new
 
 ## CLI
 
-```
-mal-openings --user <MALuser> [--status completed] [--limit N] [--skip-movies]
-             [--workdir DIR] [--client-id ID] [--auth] [--auth-port 8399]
-             [--create-playlist] [--playlist-name NAME] [--dry-run] [--fresh]
-             [-v]
-```
+Each option below is shown with its default behavior and an example. Extraction
+examples need only a public MAL list. Spotify examples require the app setup
+above and, where noted, a completed `--auth` login. The tool never writes to
+Spotify unless `--create-playlist` is present; pair it with `--dry-run` to
+preview the plan without creating a playlist or adding tracks.
 
-- Default behavior stops **before** any Spotify write; writing requires
-  `--create-playlist`, and `--dry-run` prints the plan instead of writing.
-- Extraction needs zero Spotify configuration — parse-only mode is the
-  quickest hello:
-  `python3 -m mal_openings --user <any-public-mal-user> --limit 5 --workdir /tmp/mo`
+| Option | Purpose | Example |
+|---|---|---|
+| `--user USER` | Read the public anime list for this MAL username. | `python3 -m mal_openings --user helah13 --limit 2 --workdir /tmp/mo` |
+| `--status STATUS` | Choose `watching`, `completed` (default), `onhold`, `dropped`, `plantowatch`, or `all`. | `python3 -m mal_openings --user helah13 --status watching --limit 2 --workdir /tmp/mo-watching` |
+| `--limit N` | Process only the first N entries in the selected list. | `python3 -m mal_openings --user helah13 --limit 2 --workdir /tmp/mo-limit` |
+| `--skip-movies` | Leave Movie entries out when extracting opening themes. | `python3 -m mal_openings --user helah13 --limit 2 --skip-movies --workdir /tmp/mo-no-movies` |
+| `--workdir DIR` | Store checkpoints, logs, and review reports in DIR. | `python3 -m mal_openings --user helah13 --limit 2 --workdir /tmp/mo` |
+| `--client-id ID` | Supply your Spotify app's client ID; otherwise the CLI checks `MALOP_CLIENT_ID` and its config file. | `python3 -m mal_openings --user helah13 --limit 2 --workdir /tmp/mo --client-id "$SPOTIFY_CLIENT_ID"` |
+| `--auth` | Open the Spotify browser login, cache the token, and exit. | `python3 -m mal_openings --auth --client-id "$SPOTIFY_CLIENT_ID"` |
+| `--auth-port PORT` | Set the loopback port used during `--auth`; it must match the app's redirect URI. | `python3 -m mal_openings --auth --auth-port 8399 --client-id "$SPOTIFY_CLIENT_ID"` |
+| `--create-playlist` | Create a private playlist and add resolved tracks (requires prior `--auth`). | `python3 -m mal_openings --user helah13 --limit 2 --workdir /tmp/mo --create-playlist --dry-run` |
+| `--playlist-name NAME` | Set the playlist title; by default it is `Anime Openings — USER`. | `python3 -m mal_openings --user helah13 --limit 2 --workdir /tmp/mo --create-playlist --playlist-name "My Anime OPs" --dry-run` |
+| `--dry-run` | With `--create-playlist`, show the playlist plan without writing to Spotify. | `python3 -m mal_openings --user helah13 --limit 2 --workdir /tmp/mo --create-playlist --dry-run` |
+| `--fresh` | Refetch list, themes, and resolved tracks instead of reusing checkpoints in the workdir. | `python3 -m mal_openings --user helah13 --limit 2 --fresh --workdir /tmp/mo-fresh` |
+| `-v`, `--verbose` | Print debug-level details to the console as well as the log. | `python3 -m mal_openings --user helah13 --limit 2 --verbose --workdir /tmp/mo-verbose` |
+
+The extraction commands above are safe to rerun: use the same `--workdir` to
+resume from checkpoints. `--fresh` deliberately refetches MAL pages.
 
 ## What's in the workdir
 
